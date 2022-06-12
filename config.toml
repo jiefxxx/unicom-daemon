@@ -1,0 +1,5 @@
+unix_stream_path = "/tmp/test3.stream"
+server_addr = "0.0.0.0:80"
+template_dir = "test_workspace/templates/**/*"
+app_dir = "test_workspace/apps/"
+session_path = "test_workspace/sessions.json"
