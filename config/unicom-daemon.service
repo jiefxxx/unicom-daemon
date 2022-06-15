@@ -1,0 +1,16 @@
+[Unit]
+Description=unicom-daemon
+After=network.target local-fs.target
+
+[Service]
+Type=simple
+
+ExecStart=unicom-daemon
+
+Restart=on-failure
+
+# Configures the time to wait before service is stopped forcefully.
+TimeoutStopSec=600
+
+[Install]
+WantedBy=multi-user.target
