@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
 use tokio::sync::Mutex;
-use unicom_lib::{node::{Node, NodeConnector}, error::{UnicomError, UnicomErrorKind}};
+use unicom_lib::{node::{Node, NodeConnector}, config::Config, error::{UnicomError, UnicomErrorKind}};
 
-use crate::{config::Config, http::{router::Router, render::Render, session::SessionManager}, app::AppControler};
+use crate::{http::{router::Router, render::Render, session::SessionManager}, app::AppControler};
 
 pub struct Controller{
     nodes:  Mutex<Vec<Arc<Node>>>,

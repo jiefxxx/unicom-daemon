@@ -1,0 +1,5 @@
+unix_stream_path = "/var/unicom/test3.stream"
+server_addr = "0.0.0.0:80"
+template_dir = "/var/unicom/templates/**/*"
+app_dir = "/var/unicom/apps/"
+session_path = "/var/unicom/sessions.json"
