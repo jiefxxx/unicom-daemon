@@ -46,7 +46,7 @@ impl NodeConnector for SystemConnector{
         Ok(config)
     }
 
-    async fn request(&self, request: UnicomRequest, _timeout: f32) -> Result<UnicomResponse, UnicomError>{
+    async fn request(&self, request: UnicomRequest) -> Result<UnicomResponse, UnicomError>{
         match request.id{
             0 => {
                 match request.parameters.get("tag"){

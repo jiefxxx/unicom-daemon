@@ -12,8 +12,6 @@ extern crate lazy_static;
 
 extern crate serde_json;
 
-
-
 mod unix;
 mod system;
 mod server;

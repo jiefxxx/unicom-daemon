@@ -1,13 +1,10 @@
-use std::time::Duration;
-
 use async_trait::async_trait;
 
 use tokio::net::UnixStream;
 use tokio::sync::Mutex;
 use tokio::net::unix::{OwnedReadHalf, OwnedWriteHalf};
-use tokio::time;
 use unicom_lib::arch::unix::{UnixMessage, read_message, write_message, read_init};
-use unicom_lib::error::{UnicomError, UnicomErrorKind};
+use unicom_lib::error::UnicomError;
 use unicom_lib::node::message::UnicomMessage;
 use unicom_lib::node::message::request::UnicomRequest;
 use unicom_lib::node::message::response::UnicomResponse;
@@ -46,7 +43,7 @@ impl NodeConnector for UnixConnector {
         read_init(&mut *self.reader.lock().await).await
     }
 
-    async fn request(&self, request: UnicomRequest, timeout: f32) -> Result<UnicomResponse, UnicomError>{
+    async fn request(&self, request: UnicomRequest) -> Result<UnicomResponse, UnicomError>{
         let (id, notify) = self.pending.create().await;
 
         self.write_message(UnixMessage::Request{
@@ -54,9 +51,7 @@ impl NodeConnector for UnixConnector {
             data: request,
         }).await?;
 
-        if let Err(_) = time::timeout(Duration::from_secs_f32(timeout), notify.notified()).await{
-            return Err(UnicomError::new(UnicomErrorKind::Timeout, "timeout"));
-        }
+        notify.notified().await;
 
         Ok(UnicomResponse{data: self.pending.get(id).await?})
     }

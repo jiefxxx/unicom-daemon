@@ -24,6 +24,7 @@ impl AppControler{
 
     pub async fn init(&self) -> Result<(),UnicomError>{
         for path in fs::read_dir(Path::new(&self.location))?{
+            println!("path {:?} {}", &path, self.location);
             let path = path?.path();
             if path.is_dir() {
                 self.load(path.to_str().unwrap(), false).await?;
@@ -129,6 +130,7 @@ impl AppControler{
     }
 
     async fn create_app(&self, dir: &str, config: AppConfig) -> Arc<App>{
+        println!("app directory: {}", dir);
         let app = Arc::new(App::new(dir, config));
         let ret = app.clone();
         let mut apps = self.apps.lock().await;

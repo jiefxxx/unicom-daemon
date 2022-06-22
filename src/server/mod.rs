@@ -121,7 +121,7 @@ impl Server{
                 let node = controller.node(&node_name).await?;
                 let api = node.api(&api)?;
                 add_http(api.get_method(&method)?, &mut param, url_var, &session, http::parse_body(&parts, body).await?);
-                let resp = node.request(api, method, param, 600.0).await?;
+                let resp = node.request(api, method, param).await?;
                 let file: InputFile = serde_json::from_str(&String::from_utf8(resp.data)?)?;
                 Ok(hyper_staticfile::ResponseBuilder::new()
                     .request_parts(&parts.method,&parts.uri,&parts.headers)
@@ -135,7 +135,7 @@ impl Server{
                 let node = controller.node(&node_name).await?;
                 let api = node.api(&api)?;
                 add_http(api.get_method(&method)?, &mut param, url_var, &session, http::parse_body(&parts, body).await?);
-                let node_resp = node.request(api, method, param, 600.0).await?;
+                let node_resp = node.request(api, method, param).await?;
                 let string = String::from_utf8(node_resp.data)?;
                 let mut resp = Response::builder().status(StatusCode::OK).body(Body::from(string)).unwrap();
                 resp.headers_mut().insert("Content-Type", HeaderValue::from_str("application/json").unwrap());
@@ -189,7 +189,7 @@ impl Server{
         
         add_http(api.get_method(&method)?, &mut param, url_var.clone(), session, *parsed_body);
 
-        Ok((key.to_string(), node.request(api, method, param, 600.0).await?))
+        Ok((key.to_string(), node.request(api, method, param).await?))
     }
 
 
@@ -261,7 +261,7 @@ impl Server{
             },
         };
 
-        match target_node.request(api, request.method, request.parameters, 600.0).await{
+        match target_node.request(api, request.method, request.parameters).await{
             Ok(response) => {
                 if let Err(e) = node.response(request_id, response.data).await{
                     println!("send node response erreur {:?}",e);
