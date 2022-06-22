@@ -242,7 +242,7 @@ impl Server{
     }
 
     async fn transaction_node(node: Arc<Node>, controller: Arc<Controller>, request_id: u64, request: UnicomRequest){
-
+        println!("new transaction {:?}", request);
         let target_node = match controller.node(&request.node_name).await{
             Ok(target_node) => target_node,
             Err(e) => {
