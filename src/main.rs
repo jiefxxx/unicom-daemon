@@ -1,6 +1,6 @@
-use std::fs;
+use std::{fs, sync::Arc};
 
-use tokio::signal;
+use tokio::{signal, sync::Notify};
 
 use crate::log::Logger;
 
@@ -27,6 +27,13 @@ lazy_static! {
 
 #[tokio::main]
 async fn main(){
+    let close_notify = Arc::new(Notify::new());
+    let close_notify_clone = close_notify.clone();
+    tokio::spawn(async move {
+        tokio::signal::ctrl_c().await.unwrap();
+        close_notify_clone.notify_one()
+    });
+            
     let config = read_config();
     if let Ok(_) = fs::remove_file(&config.unix_stream_path){
         println!("remove stream ");
@@ -34,7 +41,7 @@ async fn main(){
     let server = server::Server::new(&config);
     server.run().await;
 
-    signal::ctrl_c().await.unwrap();
+    close_notify.notified().await;
 
     server.stop().await;
 }

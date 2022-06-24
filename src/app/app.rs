@@ -55,7 +55,7 @@ impl AppProcess {
 
     pub async fn stop(&mut self) -> Result<(), UnicomError>{
         println!("{}", self.pid);
-        signal::kill(Pid::from_raw(self.pid as i32), Signal::SIGINT).unwrap();
+        signal::kill(Pid::from_raw(self.pid as i32), Signal::SIGTERM).unwrap();
         let fut = &mut self.handle;
         let status = fut.await.unwrap()?;
         LOGGER.app_stdout(&self.name, format!("stoped with code {}", status)).await;
