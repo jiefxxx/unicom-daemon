@@ -35,12 +35,15 @@ impl NodeConnector for SystemConnector{
             Parameter::new("input", ValueKind::Input, true)])]);
         config.add_api(5, "app_log", vec![ApiMethod::new(MethodKind::GET, vec![
             Parameter::new("name", ValueKind::String, true)])]);
+        config.add_api(6, "app_update", vec![ApiMethod::new(MethodKind::GET, vec![
+            Parameter::new("name", ValueKind::String, true)])]);
 
         config.add_endpoint("/system/nodes", EndPointKind::rest("node"));
         config.add_endpoint("/system/apps", EndPointKind::rest("apps"));
         config.add_endpoint("/system/apps/start", EndPointKind::rest("app_reload"));
         config.add_endpoint("/system/apps/stop", EndPointKind::rest("app_stop"));
         config.add_endpoint("/system/apps/logs", EndPointKind::rest("app_log"));
+        config.add_endpoint("/system/apps/update", EndPointKind::rest("app_update"));
         config.add_endpoint("/system/authenticate", EndPointKind::rest("authenticate"));
 
         Ok(config)
@@ -69,14 +72,15 @@ impl NodeConnector for SystemConnector{
             4 =>{
                 let session_id = request.parameters.get("session_id").unwrap().as_str().unwrap_or("");
                 let input: LoginInput = serde_json::from_value(request.parameters.get("input").unwrap().clone())?;
-                
-                
-
                 UnicomResponse::from_json(&json!(self.controller.sessions.authentication(session_id, &input.login, &input.password).await?))
             }
             5 =>{
                 let name = request.parameters.get("name").unwrap().as_str().unwrap_or("");
                 UnicomResponse::from_json(&json!(LOGGER.logs.lock().await.get_log(name)))
+            }
+            6 =>{
+                let name = request.parameters.get("name").unwrap().as_str().unwrap_or("");
+                UnicomResponse::from_json(&json!(self.controller.apps.update(name).await?))
             }
             _ => Ok(UnicomResponse::empty())
         }

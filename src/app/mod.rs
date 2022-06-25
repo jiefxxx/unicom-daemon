@@ -10,15 +10,17 @@ mod app;
 pub struct AppControler{
     apps: Mutex<Vec<Arc<App>>>,
     location: String,
+    stream: String,
     
 
 }
 
 impl AppControler{
-    pub fn new(location: &str) -> AppControler{
+    pub fn new(location: &str, stream: &str) -> AppControler{
         AppControler{
             apps: Mutex::new(Vec::new()),
             location: location.to_string(),
+            stream: stream.to_string(),
         }
     }
 
@@ -65,6 +67,12 @@ impl AppControler{
     pub async fn reload(&self, name: &str) -> Result<(), UnicomError>{
         let app = self.app(name).await?;
         self.load(&app.dir, true).await?;
+        Ok(())
+    }
+
+    pub async fn update(&self, name: &str) -> Result<(), UnicomError>{
+        let app = self.app(name).await?;
+        app.update().await?;
         Ok(())
     }
 
@@ -131,7 +139,7 @@ impl AppControler{
 
     async fn create_app(&self, dir: &str, config: AppConfig) -> Arc<App>{
         println!("app directory: {}", dir);
-        let app = Arc::new(App::new(dir, config));
+        let app = Arc::new(App::new(dir, config, &self.stream));
         let ret = app.clone();
         let mut apps = self.apps.lock().await;
         apps.push(app);

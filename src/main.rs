@@ -1,6 +1,6 @@
 use std::{fs, sync::Arc};
 
-use tokio::{signal, sync::Notify};
+use tokio::sync::Notify;
 
 use crate::log::Logger;
 

@@ -78,12 +78,13 @@ pub struct App{
     pub dir: String,
     connection: Mutex<Option<AppProcess>>,
     pub auto_reload: Arc<Mutex<bool>>,
-    pub state: Mutex<AppState>
+    pub state: Mutex<AppState>,
+    stream: String,
 
 }
 
 impl App{
-    pub fn new(dir: &str, config: AppConfig) -> App{
+    pub fn new(dir: &str, config: AppConfig, stream: &str) -> App{
         let auto_reload = Arc::new(Mutex::new(config.auto_reload.unwrap_or(false)));
         App{
             config,
@@ -91,6 +92,7 @@ impl App{
             connection: Mutex::new(None),
             auto_reload,
             state: Mutex::new(AppState::Waiting),
+            stream: stream.to_string(),
         }
     }
 
@@ -117,6 +119,7 @@ impl App{
             AppType::Python { venv } => {
                 let mut cmd = Command::new("unicom-python");
                 cmd.arg(&self.dir);
+                cmd.arg(&self.stream);
                 if let Some(venv) = venv{
                     cmd.arg(venv);
                 }
@@ -126,6 +129,16 @@ impl App{
         };
         *self.state.lock().await = AppState::Started;
         *self.connection.lock().await = Some(AppProcess::new(&mut cmd, self.config.name.clone())?);
+        Ok(())
+    }
+
+    pub async fn update(&self) -> Result<(), UnicomError>{
+        let mut child = Command::new("unicom-app-update")
+        .arg(&self.dir)
+        .spawn()?;
+
+        child.wait().await?;
+
         Ok(())
     }
 

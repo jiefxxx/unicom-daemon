@@ -11,6 +11,8 @@ cp ./target/release/unicom-daemon /bin/
 
 cp ./config/unicom-daemon.service  /etc/systemd/system/
 
+cp ./config/unicom-app-update /bin/
+
 #systemctl daemon-reload
 
 #systemctl enable unicom-daemon

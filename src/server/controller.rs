@@ -19,7 +19,7 @@ impl Controller{
             nodes: Mutex::new(Vec::new()),
             router: Router::new(),
             render: Render::new(&config.template_dir),
-            apps: AppControler::new(&config.app_dir),
+            apps: AppControler::new(&config.app_dir, &config.unix_stream_path),
             sessions: SessionManager::new(&config.session_path),
         }
     }
