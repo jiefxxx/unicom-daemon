@@ -1,10 +1,10 @@
-use std::{sync::Arc, convert::Infallible, net::SocketAddr, path::Path};
+use std::{sync::Arc, convert::Infallible, net::SocketAddr, path::Path, time::Duration};
 
 use futures::future::join_all;
 use hyper::{service::{make_service_fn, service_fn}, Request, Body, Response, StatusCode, header::{HeaderValue, SET_COOKIE}};
 use serde_json::{Map, Value};
 use tera::Context;
-use tokio::{net::UnixListener, time::Instant};
+use tokio::{net::UnixListener, time::{Instant, sleep}};
 use unicom_lib::{error::UnicomError, config::Config, node::{endpoint::{EndPointKind, ApiConfig}, api::MethodKind, message::{response::UnicomResponse, UnicomMessage, request::UnicomRequest}, NodeConnector, Node}};
 
 
@@ -35,7 +35,7 @@ impl Server{
         tokio::spawn(Server::new_node(Arc::new(SystemConnector{ controller: self.controller.clone() }), self.controller.clone()));
         tokio::spawn(Server::unix_server(self.unix_stream_path.clone(), self.controller.clone()));
         tokio::spawn(Server::http_server(self.server_addr, self.controller.clone()));
-
+        sleep(Duration::from_secs_f32(10.0)).await;
         if let Err(e) = self.controller.apps.init().await{
             LOGGER.error("apps init error", e).await;
         }
