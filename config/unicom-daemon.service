@@ -1,6 +1,6 @@
 [Unit]
 Description=unicom-daemon
-After=network.target remote-fs.target
+After=network.target media-storage.mount media-movie.mount media-tvshow.mount media-active.mount
 
 [Service]
 Type=simple
