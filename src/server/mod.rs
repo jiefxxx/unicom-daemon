@@ -35,7 +35,7 @@ impl Server{
         tokio::spawn(Server::new_node(Arc::new(SystemConnector{ controller: self.controller.clone() }), self.controller.clone()));
         tokio::spawn(Server::unix_server(self.unix_stream_path.clone(), self.controller.clone()));
         tokio::spawn(Server::http_server(self.server_addr, self.controller.clone()));
-        sleep(Duration::from_secs_f32(10.0)).await;
+        sleep(Duration::from_secs_f32(1.0)).await;
         if let Err(e) = self.controller.apps.init().await{
             LOGGER.error("apps init error", e).await;
         }
