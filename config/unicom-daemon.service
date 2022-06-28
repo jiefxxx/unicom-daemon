@@ -1,6 +1,6 @@
 [Unit]
 Description=unicom-daemon
-After=network.target local-fs.target
+After=network.target remote-fs.target
 
 [Service]
 Type=simple
