@@ -5,6 +5,7 @@ mkdir /var/unicom/apps
 chmod 777 /var/unicom/apps
 mkdir /var/unicom/templates
 chmod 777 /var/unicom/templates
+mkdir /var/unicom/framwork
 mkdir /etc/unicom
 
 cp ./config/config.toml /etc/unicom

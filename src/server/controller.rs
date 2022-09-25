@@ -11,6 +11,7 @@ pub struct Controller{
     pub render: Render,
     pub apps: AppControler,
     pub sessions: SessionManager,
+    pub framwork_path: String,
 }
 
 impl Controller{
@@ -21,6 +22,7 @@ impl Controller{
             render: Render::new(&config.template_dir),
             apps: AppControler::new(&config.app_dir, &config.unix_stream_path),
             sessions: SessionManager::new(&config.session_path),
+            framwork_path: config.framwork_path.clone(),
         }
     }
 

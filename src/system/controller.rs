@@ -1,9 +1,9 @@
-use std::{sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration, env, path::Path};
 
 use async_trait::async_trait;
 use serde_json::json;
 use tokio::time::sleep;
-use unicom_lib::{node::{NodeConnector, NodeConfig, api::{ApiMethod, MethodKind, Parameter, ValueKind}, endpoint::EndPointKind, message::{request::UnicomRequest, response::UnicomResponse, UnicomMessage}}, error::UnicomError};
+use unicom_lib::{node::{NodeConnector, NodeConfig, api::{ApiMethod, MethodKind, Parameter, ValueKind}, endpoint::EndPointKind, message::{request::UnicomRequest, response::UnicomResponse, UnicomMessage}}, error::UnicomError, config::Manifest};
 
 use crate::{server::controller::Controller, LOGGER};
 
@@ -21,7 +21,20 @@ pub struct SystemConnector{
 impl NodeConnector for SystemConnector{
 
     async fn init(&self) -> Result<NodeConfig, UnicomError>{
-        let mut config = NodeConfig::new("system");
+        let mut config:NodeConfig;
+        let old_path = env::current_dir().unwrap();
+        let framwork_directory = Path::new(&self.controller.framwork_path);
+
+        if env::set_current_dir(&framwork_directory).is_ok(){
+            let content = std::fs::read_to_string("manifest.toml")?;
+            let manifest: Manifest = toml::from_str(&content)?;
+
+            config = manifest.try_into().expect("Error Manifest into config framwork");
+            env::set_current_dir(&old_path).unwrap();
+        }
+        else{
+            config = NodeConfig::new("system")
+        }
 
         config.add_api(0, "nodes", vec![ApiMethod::new(MethodKind::GET, vec![
             Parameter::new("tag", ValueKind::String, false)])]);
@@ -37,14 +50,6 @@ impl NodeConnector for SystemConnector{
             Parameter::new("name", ValueKind::String, true)])]);
         config.add_api(6, "app_update", vec![ApiMethod::new(MethodKind::GET, vec![
             Parameter::new("name", ValueKind::String, true)])]);
-
-        config.add_endpoint("/system/nodes", EndPointKind::rest("node"));
-        config.add_endpoint("/system/apps", EndPointKind::rest("apps"));
-        config.add_endpoint("/system/apps/start", EndPointKind::rest("app_reload"));
-        config.add_endpoint("/system/apps/stop", EndPointKind::rest("app_stop"));
-        config.add_endpoint("/system/apps/logs", EndPointKind::rest("app_log"));
-        config.add_endpoint("/system/apps/update", EndPointKind::rest("app_update"));
-        config.add_endpoint("/system/authenticate", EndPointKind::rest("authenticate"));
 
         Ok(config)
     }

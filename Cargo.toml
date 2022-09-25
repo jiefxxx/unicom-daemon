@@ -1,6 +1,6 @@
 [package]
 name = "unicom-daemon"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -22,7 +22,7 @@ regex= "1.5.6"
 rand = "0.8.5"
 toml = "0.5.9"
 async-trait = "0.1.53"
-nix = "0.24.1"
+nix = "0.25.0"
 chrono = "0.4.19"
 pwhash = "1.0.0"
 shadow = "0.0.1"
