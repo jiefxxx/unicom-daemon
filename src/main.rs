@@ -25,6 +25,16 @@ lazy_static! {
     static ref LOGGER: Logger = Logger::new();
 }
 
+lazy_static! {
+    static ref SERVER: server::Server = {
+        let config = read_config();
+        if let Ok(_) = fs::remove_file(&config.unix_stream_path){
+            println!("remove stream ");
+        }
+        server::Server::new(&config)
+    };
+}
+
 #[tokio::main]
 async fn main(){
     let close_notify = Arc::new(Notify::new());
@@ -38,12 +48,12 @@ async fn main(){
     if let Ok(_) = fs::remove_file(&config.unix_stream_path){
         println!("remove stream ");
     }
-    let server = server::Server::new(&config);
-    server.run().await;
+
+    SERVER.run().await;
 
     close_notify.notified().await;
 
-    server.stop().await;
+    SERVER.stop().await;
 }
 
 pub fn read_config() -> Config{

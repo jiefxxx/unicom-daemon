@@ -17,7 +17,7 @@ pub mod controller;
 
 pub struct Server{
     unix_stream_path: String,
-    controller: Arc<Controller>,
+    pub controller: Arc<Controller>,
     server_addr: SocketAddr,
 }
 

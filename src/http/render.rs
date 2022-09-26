@@ -1,8 +1,12 @@
 use std::collections::HashMap;
 
-use tera::{Tera, Context, Value};
-use tokio::sync::Mutex;
+use inflector::Inflector;
+use serde_json::{from_value, json};
+use tera::{Tera, Context, Value, Function};
+use tokio::{sync::Mutex, task, runtime::Handle};
 use unicom_lib::{node::NodeConfig, error::UnicomError};
+
+use crate::SERVER;
 
 
 #[derive(Debug)]
@@ -18,6 +22,8 @@ impl Render{
         tera.register_filter("multidigit", multi_digit);
         tera.register_filter("bytes", bytes);
         tera.register_filter("duration", duration);
+        tera.register_filter("capitalize_first", capitalize_first);
+        tera.register_function("get_node_tag", get_node_tag());
 
         Render{
             tera: Mutex::new(tera),
@@ -39,6 +45,11 @@ impl Render{
         Ok(())
     }
 
+}
+
+fn capitalize_first(v: &Value, _h: &HashMap<String, Value>) -> Result<Value, tera::Error>{
+    let data = v.as_str().unwrap_or_default().to_title_case();
+    Ok(Value::from(data))
 }
 
 fn multi_digit(v: &Value, _h: &HashMap<String, Value>) -> Result<Value, tera::Error>{
@@ -69,4 +80,22 @@ fn duration(v: &Value, _h:& HashMap<String, Value>) -> Result<Value, tera::Error
     else{
         return Ok(Value::from(format!("{}min", minutes)));
     } 
+}
+
+fn get_node_tag() -> impl Function {
+    Box::new(move |args: &HashMap<String, Value>| -> tera::Result<Value> {
+        match args.get("tag") {
+            Some(val) => match from_value::<String>(val.clone()) {
+                Ok(tag) =>  {
+                    Ok(json!(task::block_in_place(move || -> Vec<(String, String)>{
+                        Handle::current().block_on(async move {
+                            SERVER.controller.get_node_tag(&tag).await
+                        })
+                    })))
+                },
+                Err(_) => Err("oops".into()),
+            },
+            None => Err("oops".into()),
+        }
+    })
 }
